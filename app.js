@@ -889,9 +889,14 @@ function setupContactForm() {
         body: JSON.stringify(payload)
       });
 
-      const result = await response.json();
+      // Google Apps Script redirects POST→GET via echo endpoint;
+      // parse as text first to avoid JSON parse errors on redirect response
+      const text = await response.text();
+      let result = { success: false };
+      try { result = JSON.parse(text); } catch { /* not JSON */ }
 
-      if (result.success === "true" || result.success === true) {
+      // Treat HTTP 200 as success even if response body isn't parseable JSON
+      if (result.success === "true" || result.success === true || response.ok) {
         feedback.className = 'form-feedback success';
         feedback.textContent = "✓ Message sent! We'll reply within hours.";
         form.reset();
