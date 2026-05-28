@@ -829,9 +829,8 @@ function syncCustomSelectsLang() {
 }
 
 function setupContactForm() {
-  // ── Formsubmit.co — безкоштовно, безліміт, реєстрація не потрібна ────────
-  // Перший раз після відправки прийде лист на пошту для активації — підтвердіть його
-  const FORM_EMAIL = "aureon.enterprise.main@gmail.com";
+  // ── Google Apps Script → Google Sheets + email ────────────────────────────
+  const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycbz8QlS021hCg82SzCiAims0-AfNii0f1qgQTExtz4SEJ_nXFx6Arb-Y3iX0pjhkMhyWnA/exec";
   // ─────────────────────────────────────────────────────────────────────────
 
   const form = $("[data-contact-form]");
@@ -884,9 +883,9 @@ function setupContactForm() {
         message: data.get("message") || ""
       };
 
-      const response = await fetch(`https://formsubmit.co/ajax/${FORM_EMAIL}`, {
+      const response = await fetch(FORM_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
