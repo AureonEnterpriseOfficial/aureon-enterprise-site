@@ -829,11 +829,9 @@ function syncCustomSelectsLang() {
 }
 
 function setupContactForm() {
-  // ── Replace with your Formspree Form ID ──────────────────────────────────
-  // 1. Go to https://formspree.io → Sign Up (free)
-  // 2. Click "New Form", set email to aureon.enterprise.official@gmail.com
-  // 3. Copy the Form ID (looks like "xpwzabcd") and paste it below
-  const FORMSPREE_ID = "mpqnkrel";
+  // ── Formsubmit.co — безкоштовно, безліміт, реєстрація не потрібна ────────
+  // Перший раз після відправки прийде лист на пошту для активації — підтвердіть його
+  const FORM_EMAIL = "aureon.enterprise.main@gmail.com";
   // ─────────────────────────────────────────────────────────────────────────
 
   const form = $("[data-contact-form]");
@@ -867,18 +865,6 @@ function setupContactForm() {
       return;
     }
 
-    // Fallback to mailto if Formspree ID not set yet
-    if (FORMSPREE_ID === "YOUR_FORM_ID") {
-      const data = new FormData(form);
-      const subject = encodeURIComponent(`Aureon Enterprise: ${data.get("service") || "account"}`);
-      const body = encodeURIComponent(
-        [`Name: ${data.get("name") || ""}`, `Contact: ${data.get("contact") || ""}`,
-         `Service: ${data.get("service") || ""}`, "", data.get("message") || ""].join("\n")
-      );
-      window.location.href = `mailto:aureon.enterprise.official@gmail.com?subject=${subject}&body=${body}`;
-      return;
-    }
-
     // Loading state
     if (submitBtn) {
       submitBtn.disabled = true;
@@ -890,13 +876,23 @@ function setupContactForm() {
     feedback.textContent = '';
 
     try {
-      const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+      const data = new FormData(form);
+      const payload = {
+        name:    data.get("name")    || "",
+        contact: data.get("contact") || "",
+        service: data.get("service") || "",
+        message: data.get("message") || ""
+      };
+
+      const response = await fetch(`https://formsubmit.co/ajax/${FORM_EMAIL}`, {
         method: "POST",
-        body: new FormData(form),
-        headers: { Accept: "application/json" }
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
       });
 
-      if (response.ok) {
+      const result = await response.json();
+
+      if (result.success === "true" || result.success === true) {
         feedback.className = 'form-feedback success';
         feedback.textContent = "✓ Message sent! We'll reply within hours.";
         form.reset();
